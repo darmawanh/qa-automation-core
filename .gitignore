@@ -1,7 +1,6 @@
 # Gradle
 .gradle/
 build/
-!gradle/wrapper/gradle-wrapper.jar
 !gradle/wrapper/gradle-wrapper.properties
 
 # IDE
@@ -18,6 +17,7 @@ build/
 *.class
 *.jar
 *.war
+!gradle/wrapper/gradle-wrapper.jar
 
 # OS
 .DS_Store
