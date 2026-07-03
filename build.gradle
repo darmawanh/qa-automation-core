@@ -1,0 +1,93 @@
+plugins {
+    id 'java-library'
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+}
+
+group = 'com.localfirst.qa'
+version = '0.1.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Force Groovy 3.x versions to match Gradle 8.7's bundled Groovy 3.0.17.
+// REST Assured 4.5.1 pulls a different 3.x minor; without this block the
+// Groovy ExtensionModuleScanner throws "Conflicting module versions" at
+// static-init time. When the platform upgrades to Gradle 9+ (Groovy 4.x),
+// also upgrade REST Assured to 5.x and remove this block.
+configurations.all {
+    resolutionStrategy {
+        force 'org.codehaus.groovy:groovy:3.0.17'
+        force 'org.codehaus.groovy:groovy-xml:3.0.17'
+        force 'org.codehaus.groovy:groovy-json:3.0.17'
+    }
+}
+
+dependencies {
+    // === API Automation ===
+    api 'io.rest-assured:rest-assured:4.5.1'
+    api 'io.rest-assured:json-schema-validator:4.5.1'
+
+    // === Test Runner ===
+    api 'org.testng:testng:7.9.0'
+
+    // === BDD / Cucumber ===
+    api 'io.cucumber:cucumber-java:7.15.0'
+    api 'io.cucumber:cucumber-testng:7.15.0'
+
+    // === Reporting ===
+    api 'io.qameta.allure:allure-cucumber7-jvm:2.25.0'
+    api 'io.qameta.allure:allure-testng:2.25.0'
+
+    // === JSON / Schema ===
+    api 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
+
+    // === Assertions ===
+    api 'org.assertj:assertj-core:3.25.3'
+
+    // === Utilities ===
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+
+    // === Testing ===
+    testImplementation 'org.testng:testng:7.9.0'
+}
+
+test {
+    useTestNG()
+}
+
+gradlePlugin {
+    plugins {
+        qaAutomation {
+            id = 'com.localfirst.qa-automation'
+            implementationClass = 'com.localfirst.qa.plugin.QaAutomationPlugin'
+            displayName = 'Local-First QA Automation Convention Plugin'
+            description = 'Applies standard QA automation conventions: Java 17, REST Assured, ' +
+                          'Cucumber+TestNG, Allure reporting, suite registration, and guardrails.'
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = 'QA Automation Core'
+                description = 'Reusable QA automation framework for the Local-First AI CCTV platform. ' +
+                              'Provides REST Assured wrappers, assertion facade, retry/polling utilities, ' +
+                              'Allure+Cucumber reporting, and a Gradle convention plugin.'
+            }
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
