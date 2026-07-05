@@ -1,0 +1,53 @@
+# Publish qa-automation-core to GitHub Packages
+#
+# Publishes the qa-automation-core library and convention plugin to GitHub Packages
+# on every push to master. Consuming projects (platform-ops) can then resolve
+# the artifact as a dependency instead of building from source.
+#
+# Authentication: Uses GITHUB_TOKEN which has automatic read access to packages
+# in this repository. Cross-repo consumers (platform-ops) need a PAT with
+# `read:packages` scope configured as GH_PAT secret in their repository.
+#
+# See: docs/engineering/QA-AUTOMATION-CORE-PUBLISH.md
+
+name: Publish to GitHub Packages
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    name: Publish to GitHub Packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Publish to GitHub Packages
+        run: ./gradlew publish
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to Maven Local (backup)
+        run: ./gradlew publishToMavenLocal
