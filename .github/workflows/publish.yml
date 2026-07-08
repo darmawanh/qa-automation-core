@@ -8,7 +8,7 @@
 # in this repository. Cross-repo consumers (platform-ops) need a PAT with
 # `read:packages` scope configured as GH_PAT secret in their repository.
 #
-# See: docs/engineering/QA-AUTOMATION-CORE-PUBLISH.md
+# See: docs/engineering/qa/QA-AUTOMATION-CORE-PUBLISH.md
 
 name: Publish to GitHub Packages
 
